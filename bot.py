@@ -1,3 +1,83 @@
+import time
+import requests
+
+# কনফিগারেশন সেটিংস (আপনার টেলিগ্রাম বট টোকেন এবং চ্যানেলের আইডি)
+TOKEN = "8227650357:AAHeNm-m8RYH5gpdMQEVDYiVhh4rNBgaaHc"
+CHANNEL_ID = "@technical_botprototype"
+
+# বট চালু বা বন্ধ রাখার সুইচ
+IS_ACTIVE = True
+
+# ক্যাটাগরি এবং প্রোডাক্টের তথ্যের তালিকা
+DEALS_DATABASE = [
+    {
+        "category": "TWS Earbuds",
+        "title": "Best Budget TWS with ENC",
+        "link": "https://amazon.in/example-tws-link",
+        "pre_fetched_data": "🔥 Pre-fetched Deal: High-quality TWS with 40H playtime ready for you!"
+    },
+    {
+        "category": "Smartwatch",
+        "title": "Value for Money AMOLED Smartwatch",
+        "link": "https://dl.flipkart.com/example-watch-link",
+        "pre_fetched_data": "🔥 Pre-fetched Deal: AMOLED Display smartwatch under budget!"
+    }
+]
+
+# --- অ্যানালাইজার লজিক কোড ---
+class TWSAnalyzer:
+    def __init__(self):
+        self.budget_ranges = [(0, 500), (500, 700), (700, 800), (800, 1000), (1000, 1500), (1500, 2000), (2000, 3000), (3000, 4000), (4000, 5000)]
+    def validate_features(self, price, specs):
+        return True, []
+
+class DealCuratorMaster:
+    def __init__(self):
+        self.analyzers = {'tws': TWSAnalyzer()}
+    def evaluate_product(self, category_key, price, specs):
+        return True, []
+
+
+# --- টেলিগ্রাম বট ও টাইমার লজিক ---
+def send_deal_to_telegram(message):
+    if not IS_ACTIVE:
+        print("⚠️ Bot is currently paused by the user.")
+        return
+    
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    payload = {
+        "chat_id": CHANNEL_ID,
+        "text": message,
+        "parse_mode": "Markdown"
+    }
+    
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            print("✅ Deal posted successfully!")
+        else:
+            print(f"❌ Failed to post: {response.text}")
+    except Exception as e:
+        print(f"⚠️ Error occurred: {e}")
+
+def main_loop():
+    print("🤖 Bot started running...")
+    index = 0
+    
+    while True:
+        current_deal = DEALS_DATABASE[index]
+        print(f"🔄 Pre-fetching data for: {current_deal['category']} 1 hour prior...")
+        
+        # ২ ঘণ্টা পরপর পোস্ট করার টাইমার (৭২০০ সেকেন্ড)
+        time.sleep(7200) 
+        
+        message = f"*{current_deal['title']}*\n\n{current_deal['pre_fetched_data']}\n\n👉 [Check Deal Here]({current_deal['link']})"
+        send_deal_to_telegram(message)
+        
+        index = (index + 1) % len(DEALS_DATABASE)
+
+
+    
 class TWSAnalyzer:
     def __init__(self):
         self.budget_ranges = [
@@ -1323,3 +1403,6 @@ test_product = {
 is_valid, messages = app.evaluate_product(test_category, test_product['price'], test_product['specs'])
 print(f"\nTarget Product: {test_product['name']} (Category: {test_category})")
 print("System Status: 🟢 Approved for Deal Channel!" if is_valid else f"Status: 🔴 Rejected: {messages}")
+if __name__ == "__main__":
+    main_loop()
+    
