@@ -1462,9 +1462,15 @@ def main_loop():
         time.sleep(7200)
 
 if __name__ == "__main__":
-    # মূল লুপটিকেও একটি আলাদা ব্যাকগ্রাউন্ড থ্রেডে চালিয়ে দেওয়া হলো যাতে ফ্লাস্ক পোর্ট ব্লক না হয়
+    # মূল লুপটি ব্যাকগ্রাউন্ডে শুরু করা হলো
     bot_thread = threading.Thread(target=main_loop, daemon=True)
     bot_thread.start()
+    
+    # ফ্লাস্ক সার্ভারটি মেইন প্রসেসে রান করবে যাতে রেন্ডার পোর্ট ধরে রাখতে পারে
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+    
+    
         
     
     
