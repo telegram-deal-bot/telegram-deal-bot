@@ -4,7 +4,18 @@ import requests
 # কনফিগারেশন সেটিংস (আপনার টেলিগ্রাম বট টোকেন এবং চ্যানেলের আইডি)
 TOKEN = "8227650357:AAHeNm-m8RYH5gpdMQEVDYiVhh4rNBgaaHc"
 CHANNEL_ID = "@technical_botprototype"
+# --- অটো অ্যামাজন অ্যাফিলিয়েট ট্যাগ কনফিগারেশন ---
+AMAZON_TAG = "technicalbot2-21"
 
+def format_affiliate_link(url):
+    if "amazon.in" in url or "amzn.to" in url:
+        if "?" in url:
+            if "tag=" not in url:
+                return url + f"&tag={AMAZON_TAG}"
+        else:
+            return url + f"?tag={AMAZON_TAG}"
+    return url
+    
 # বট চালু বা বন্ধ রাখার সুইচ
 IS_ACTIVE = True
 
