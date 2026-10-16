@@ -1429,6 +1429,42 @@ test_product = {
 is_valid, messages = app.evaluate_product(test_category, test_product['price'], test_product['specs'])
 print(f"\nTarget Product: {test_product['name']} (Category: {test_category})")
 print("System Status: 🟢 Approved for Deal Channel!" if is_valid else f"Status: 🔴 Rejected: {messages}")
+def main_loop():
+    print("🤖 Bot main loop started...")
+    DEALS_DATABASE = [
+        {
+            "category": "TWS Earbuds",
+            "title": "Best Budget TWS with ENC",
+            "link": "https://amazon.in/example-tws-link",
+            "pre_fetched_data": "🔥 Pre-fetched Deal: High-quality TWS with 40H playtime ready for you!"
+        },
+        {
+            "category": "Smartwatch",
+            "title": "Value for Money AMOLED Smartwatch",
+            "link": "https://dl.flipkart.com/example-watch-link",
+            "pre_fetched_data": "🔥 Pre-fetched Deal: AMOLED Display smartwatch under budget!"
+        }
+    ]
+    index = 0
+    
+    while True:
+        current_deal = DEALS_DATABASE[index]
+        message = f"*{current_deal['title']}*\n\n{current_deal['pre_fetched_data']}\n\n👉 [Check Deal Here]({current_deal['link']})"
+        
+        # প্রথমে সাথে সাথে মেসেজ পাঠাবে
+        send_deal_to_telegram(message)
+        
+        # পরবর্তী ডিল বা ক্যাটাগরিতে যাওয়ার জন্য ইনডেক্স আপডেট
+        index = (index + 1) % len(DEALS_DATABASE)
+        
+        # মেসেজ পাঠানোর পর ২ ঘণ্টা (৭২০০ সেকেন্ড) অপেক্ষা করবে
+        print("⏳ Waiting for 2 hours before the next deal...")
+        time.sleep(7200)
+
 if __name__ == "__main__":
-    main_loop()
+    # মূল লুপটিকেও একটি আলাদা ব্যাকগ্রাউন্ড থ্রেডে চালিয়ে দেওয়া হলো যাতে ফ্লাস্ক পোর্ট ব্লক না হয়
+    bot_thread = threading.Thread(target=main_loop, daemon=True)
+    bot_thread.start()
+        
+    
     
