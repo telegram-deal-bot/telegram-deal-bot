@@ -1456,11 +1456,38 @@ def main_loop():
         print("⏳ Waiting for 2 hours before the next deal...")
         time.sleep(7200)
 
-# কোডের একদম শেষ লাইনে অতিরিক্ত কিছু না রেখে শুধু এই লুপটিই যথেষ্ট:
+# --- ব্যাকগ্রাউন্ডে ফ্লাস্ক সার্ভার রান করানোর জন্য থ্রেড (Railway-এর পোর্ট রিকোয়েস্ট সামলানোর জন্য) ---
+def run_flask():
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+
 if __name__ == "__main__":
-    # যেহেতু আপনার কোডটি ওপরের while True লুপ দিয়েই ডিল পাঠানো হ্যান্ডেল করছে, 
-    # তাই এখানে আলাদা করে ক্লাসের ইনস্ট্যান্স কল করার দরকার নেই।
-    pass
+    print("🚀 Starting Telegram Deal Bot server and background loop...")
+    
+    # ১. ফ্লাস্ক সার্ভারকে ব্যাকগ্রাউন্ড থ্রেডে চালু করা হলো (যাতে Railway-এর পোর্ট বাইন্ডিং নিয়ে ক্র্যাশ না করে)
+    server_thread = threading.Thread(target=run_flask)
+    server_thread.daemon = True
+    server_thread.start()
+    
+    # ২. টেলিগ্রামে ডিল পাঠানোর মূল লুপটি এখানে সরাসরি কল করা হলো
+    index = 0
+    while True:
+        try:
+            current_deal = DEALS_DATABASE[index]
+            message = f"*{current_deal['title']}*\n\n{current_deal['pre_fetched_data']}\n\n👉 [Check Deal Here]({current_deal['link']})"
+            
+            # সাথে সাথে মেসেজ পাঠাবে
+            send_deal_to_telegram(message)
+            
+            # পরবর্তী ডিলে যাওয়ার জন্য ইনডেক্স আপডেট
+            index = (index + 1) % len(DEALS_DATABASE)
+        except Exception as e:
+            print(f"⚠️ Error in main loop: {e}")
+        
+        # মেসেজ পাঠানোর পর ২ ঘণ্টা (৭২০০ সেকেন্ড) অপেক্ষা করবে
+        print("⏳ Waiting for 2 hours before the next deal...")
+        time.sleep(7200)
+    
     
     
     
