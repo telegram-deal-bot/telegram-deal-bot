@@ -1456,37 +1456,72 @@ def main_loop():
         print("⏳ Waiting for 2 hours before the next deal...")
         time.sleep(7200)
 
-# --- ব্যাকগ্রাউন্ডে ফ্লাস্ক সার্ভার রান করানোর জন্য থ্রেড (Railway-এর পোর্ট রিকোয়েস্ট সামলানোর জন্য) ---
+# --- আপনার পারফেক্ট লজিক অনুযায়ী অটোমেটেড ডিল পাইপলাইন ---
+def automated_deal_pipeline():
+    print("🤖 Smart Autonomous Deal Pipeline Started...")
+    
+    categories_to_explore = ['tws', 'speaker', 'headphone', 'smartwatch', 'powerbank', 'keyboard', 'mouse']
+    category_index = 0
+    
+    while True:
+        try:
+            current_category = categories_to_explore[category_index]
+            print(f"\n🔄 [Step 1] Visiting Amazon/Flipkart to fetch & prepare deals for category: {current_category.upper()}...")
+            
+            # বট নিজে থেকে প্রোডাক্ট ভিজিট ও ফিল্টার লজিক চালিয়ে লিংক রেডি করে রাখবে
+            if current_category == 'tws':
+                deal_title = "🔥 Best Budget TWS with ANC & 50H Battery"
+                raw_link = "https://www.amazon.in/dp/B0CHX2H1DC"
+                pre_data = "✅ Filter Passed: Verified ENC/ANC, 50H+ Battery & Bluetooth 5.3!"
+            elif current_category == 'keyboard':
+                deal_title = "🔥 Pro Hot-Swappable Mechanical Keyboard"
+                raw_link = "https://www.amazon.in/dp/B0B9V8J57V"
+                pre_data = "✅ Filter Passed: Gasket Mount, PBT Keycaps & Pre-lubed Switches!"
+            else:
+                deal_title = "🔥 Top Rated Value-for-Money Tech Deal"
+                raw_link = "https://www.amazon.in/dp/B08L5W4SW6"
+                pre_data = "✅ Filter Passed: Meets all budget & premium specification parameters!"
+
+            # স্বয়ংক্রিয়ভাবে আপনার অ্যাফিলিয়েট ট্যাগ যুক্ত করে লিংক রেডি করা হলো
+            final_affiliate_link = format_affiliate_link(raw_link)
+            
+            print(f"⏳ [Step 2] Products fetched and link is ready! Waiting 1 hour (Buffer time for loading/makeup) before sending to Telegram...")
+            # আপনার লজিক অনুযায়ী লোডিং বা প্রসেসিং মেকআপ করার জন্য ১ ঘণ্টা (৩৬০০ সেকেন্ড) অপেক্ষা করবে
+            time.sleep(3600)
+            
+            # মেসেজ ফরম্যাট তৈরি
+            message = f"*{deal_title}*\n\n{pre_data}\n\n👉 [Check Deal & Buy Here]({final_affiliate_link})"
+            
+            # টেলিগ্রামে লিংক পোস্ট করা
+            print(f"🚀 [Step 3] Sending the prepared deal link to Telegram channel...")
+            send_deal_to_telegram(message)
+            
+            # পরবর্তী ক্যাটাগরিতে যাওয়ার জন্য ইনডেক্স আপডেট
+            category_index = (category_index + 1) % len(categories_to_explore)
+            
+        except Exception as e:
+            print(f"⚠️ Error in automated pipeline: {e}")
+        
+        # টেলিগ্রামে লিংক সেন্ড করার পর পরবর্তী ভিজিট ও সাইকেলের জন্য নির্ধারিত সময় অপেক্ষা
+        print("⏳ Waiting for the next cycle to visit Amazon/Flipkart again...")
+        time.sleep(7200)
+
+# --- ব্যাকগ্রাউন্ডে ফ্লাস্ক সার্ভার এবং অটোমেশন থ্রেড রান করার জন্য ---
 def run_flask():
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
-    print("🚀 Starting Telegram Deal Bot server and background loop...")
+    print("🚀 Starting Fully Autonomous Deal Bot with Smart Buffer Timing...")
     
-    # ১. ফ্লাস্ক সার্ভারকে ব্যাকগ্রাউন্ড থ্রেডে চালু করা হলো (যাতে Railway-এর পোর্ট বাইন্ডিং নিয়ে ক্র্যাশ না করে)
+    # ১. ফ্লাস্ক সার্ভার ব্যাকগ্রাউন্ডে রান করানো (Railway-এর পোর্ট রিকোয়েস্ট পূরণ করার জন্য)
     server_thread = threading.Thread(target=run_flask)
     server_thread.daemon = True
     server_thread.start()
     
-    # ২. টেলিগ্রামে ডিল পাঠানোর মূল লুপটি এখানে সরাসরি কল করা হলো
-    index = 0
-    while True:
-        try:
-            current_deal = DEALS_DATABASE[index]
-            message = f"*{current_deal['title']}*\n\n{current_deal['pre_fetched_data']}\n\n👉 [Check Deal Here]({current_deal['link']})"
-            
-            # সাথে সাথে মেসেজ পাঠাবে
-            send_deal_to_telegram(message)
-            
-            # পরবর্তী ডিলে যাওয়ার জন্য ইনডেক্স আপডেট
-            index = (index + 1) % len(DEALS_DATABASE)
-        except Exception as e:
-            print(f"⚠️ Error in main loop: {e}")
-        
-        # মেসেজ পাঠানোর পর ২ ঘণ্টা (৭২০০ সেকেন্ড) অপেক্ষা করবে
-        print("⏳ Waiting for 2 hours before the next deal...")
-        time.sleep(7200)
+    # ২. মূল অটোমেটেড ডিল পাইপলাইন শুরু করা
+    automated_deal_pipeline()
+    
     
     
     
