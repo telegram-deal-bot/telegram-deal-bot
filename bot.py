@@ -1461,14 +1461,6 @@ def main_loop():
         print("⏳ Waiting for 2 hours before the next deal...")
         time.sleep(7200)
 
-if __name__ == "__main__":
-    # ১. বট লুপটিকে ব্যাকগ্রাউন্ড থ্রেডে চালু করা হলো
-    bot_thread = threading.Thread(target=main_loop, daemon=True)
-    bot_thread.start()
-    
-    # ২. ফ্লাস্ক সার্ভারটি মেইন প্রসেসে রান করবে যাতে রেন্ডার পোর্ট ধরে রাখতে পারে
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
     
     
     
