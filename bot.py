@@ -1456,8 +1456,13 @@ def main_loop():
         print("⏳ Waiting for 2 hours before the next deal...")
         time.sleep(7200)
 
+# কোডের একদম শেষ লাইনে অতিরিক্ত কিছু না রেখে শুধু এই লুপটিই যথেষ্ট:
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    # যেহেতু আপনার কোডটি ওপরের while True লুপ দিয়েই ডিল পাঠানো হ্যান্ডেল করছে, 
+    # তাই এখানে আলাদা করে ক্লাসের ইনস্ট্যান্স কল করার দরকার নেই।
+    pass
+    
+    
     
     
     
